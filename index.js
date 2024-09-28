@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { pool } from "./db.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 const app = express();
 
 // middleware
@@ -10,7 +13,7 @@ app.use(express.json());
 // routes
 
 // create a todo
-app.post("/todos", async (req, res) => {
+app.post("/api/todos", async (req, res) => {
   try {
     const { description } = req.body;
     const newTodo = await pool.query(
@@ -18,15 +21,14 @@ app.post("/todos", async (req, res) => {
       [description]
     );
     console.log(newTodo.rows[0]);
-
-    res.json(newTodo);
+    res.json(newTodo.rows[0]);
   } catch (error) {
     console.log(error.message);
   }
 });
 
 // get all todo
-app.get("/todos", async (req, res) => {
+app.get("/api/todos", async (req, res) => {
   try {
     const allTodos = await pool.query("SELECT * FROM todo");
     res.json(allTodos.rows);
@@ -36,7 +38,7 @@ app.get("/todos", async (req, res) => {
 });
 
 // get a todo
-app.get("/todos/:id", async (req, res) => {
+app.get("/api/todos/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1", [
@@ -50,23 +52,23 @@ app.get("/todos/:id", async (req, res) => {
 });
 
 // update a todo
-app.put("/todos/:id", async (req, res) => {
+app.put("/api/todos/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { description } = req.body;
     const updatedTodo = await pool.query(
-      "UPDATE todo SET description = $1 WHERE todo_id = $2",
+      "UPDATE todo SET description = $1 WHERE todo_id = $2 RETURNING *",
       [description, id]
     );
 
-    res.json({ message: "todo was updated." });
+    res.json({ todo: updatedTodo.rows[0], message: "todo was updated." });
   } catch (error) {
     console.log(error.message);
   }
 });
 
 // delete a todo
-app.delete("/todos/:id", async (req, res) => {
+app.delete("/api/todos/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedTodo = await pool.query(
@@ -81,7 +83,7 @@ app.delete("/todos/:id", async (req, res) => {
 });
 
 // delete all todo
-app.delete("/todos/", async (req, res) => {
+app.delete("/api/todos/", async (req, res) => {
   try {
     const deletedTodos = await pool.query("DELETE FROM todo ");
 
@@ -91,6 +93,6 @@ app.delete("/todos/", async (req, res) => {
   }
 });
 
-app.listen(8000, () => {
-  console.log("server has started on port 8000:");
+app.listen(process.env.PORT, () => {
+  console.log("server has started on port ", process.env.PORT);
 });

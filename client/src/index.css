@@ -17,7 +17,7 @@
   }
 
   body {
-    @apply font-poppins;
+    @apply font-inter;
   }
 }
 
@@ -37,7 +37,11 @@
   }
 
   .btn-destructive {
-    @apply bg-red-600 text-gray-900;
+    @apply bg-red-600 text-gray-50;
+  }
+
+  .btn-success {
+    @apply bg-blue-600 text-gray-50;
   }
 
   .btn-info {
